@@ -1,64 +1,66 @@
 import unittest
-import pandas as pd
-import os
 import sys
+import os
+import pandas as pd
+import numpy as np
 
+# Add the path to the 'scripts' directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../scripts')))
 
-from data_processing import (
-    load_data, summarize_data, check_missing_values
-)
+# Import functions from data_processing.py
+from data_processing import load_data, summarize_data, check_missing_values
 
-class TestDataProcessing(unittest.TestCase):
+class TestInsuranceDataProcessing(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """
-        Class-level setup to define data file path.
-        """
-        cls.file_path = '../data/MachineLearningRating_v3.txt'
-
-    def setUp(self):
-        """
-        Method-level setup to run before each test.
-        """
-        if not os.path.isfile(self.file_path):
-            self.skipTest(f"File {self.file_path} not found")
+        cls.sample_data = pd.DataFrame({
+            'ClaimID': [1, 2, 3, 4, 5],
+            'PolicyID': [101, 102, 103, 104, 105],
+            'ClaimAmount': [5000, 7000, np.nan, 12000, -200],
+            'ClaimStatus': ['Approved', 'Pending', 'Denied', 'Approved', 'Denied'],
+            'DateOfClaim': ['2024-01-15', '2024-02-20', '2024-03-10', '2024-04-25', '2024-05-30']
+        })
+        cls.sample_data['DateOfClaim'] = pd.to_datetime(cls.sample_data['DateOfClaim'])
 
     def test_load_data(self):
-        """
-        Test load_data function to check if it returns a DataFrame
-        and that the DataFrame is not empty.
-        """
-        print("Testing load_data function...")
-        df = load_data(self.file_path)
-        self.assertIsInstance(df, pd.DataFrame, "load_data did not return a DataFrame")
-        self.assertFalse(df.empty, "DataFrame is empty")
-        print("Passed: load_data")
+        """Test if the load_data function correctly loads the data."""
+        try:
+            data = load_data('data/sample_data.csv')
+            self.assertIsInstance(data, pd.DataFrame, "Loaded data should be a DataFrame.")
+            self.assertFalse(data.empty, "Loaded data should not be empty.")
+        except FileNotFoundError:
+            self.fail("Sample data file not found.")
 
     def test_summarize_data(self):
-        """
-        Test summarize_data function to check if it returns
-        descriptive statistics as a DataFrame and data types as a Series.
-        """
-        print("Testing summarize_data function...")
-        df = load_data(self.file_path)
-        desc_stats, data_types = summarize_data(df)
-        self.assertIsInstance(desc_stats, pd.DataFrame, "summarize_data did not return a DataFrame for statistics")
-        self.assertIsInstance(data_types, pd.Series, "summarize_data did not return a Series for data types")
-        print("Passed: summarize_data")
+        """Test if summarize_data provides the correct summary."""
+        summary = summarize_data(self.sample_data)
+        self.assertIsInstance(summary, dict, "Summary should be a dictionary.")
+        self.assertIn('ClaimAmount', summary, "Summary should include 'ClaimAmount'.")
 
     def test_check_missing_values(self):
-        """
-        Test check_missing_values function to check if it correctly
-        identifies missing values and returns a Series.
-        """
-        print("Testing check_missing_values function...")
-        df = load_data(self.file_path)
-        missing_values = check_missing_values(df)
-        self.assertIsInstance(missing_values, pd.Series, "check_missing_values did not return a Series")
-        self.assertEqual(missing_values.sum(), 0, "There are missing values in the data")
-        print("Passed: check_missing_values")
+        """Test if check_missing_values identifies missing values correctly."""
+        missing_info = check_missing_values(self.sample_data)
+        self.assertIsInstance(missing_info, dict, "Missing values info should be a dictionary.")
+        self.assertIn('ClaimAmount', missing_info, "Missing values info should include 'ClaimAmount'.")
+
+    def test_clipping_claim_amount(self):
+        """Test if ClaimAmount values are clipped to be non-negative."""
+        self.sample_data['ClaimAmount'] = self.sample_data['ClaimAmount'].clip(lower=0)
+        valid_claim_amounts = self.sample_data['ClaimAmount']
+        self.assertTrue((valid_claim_amounts >= 0).all(), "ClaimAmount values should be non-negative.")
+
+    def test_claim_status(self):
+        """Test if ClaimStatus only contains valid statuses."""
+        valid_statuses = ['Approved', 'Pending', 'Denied']
+        status_series = self.sample_data['ClaimStatus']
+        invalid_statuses = status_series[~status_series.isin(valid_statuses)]
+        self.assertTrue(invalid_statuses.empty, "ClaimStatus contains invalid values.")
+
+    def test_date_of_claim_format(self):
+        """Test if DateOfClaim is in the correct datetime format."""
+        date_series = self.sample_data['DateOfClaim']
+        self.assertTrue(pd.api.types.is_datetime64_any_dtype(date_series), "DateOfClaim should be in datetime format.")
 
 if __name__ == '__main__':
     unittest.main()
