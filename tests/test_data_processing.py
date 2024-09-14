@@ -1,13 +1,7 @@
 import unittest
 import pandas as pd
 import numpy as np
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.getcwd(), '../scripts')))
 
-from data_processing import (
-    load_data, summarize_data, check_missing_values
-)
 # Sample DataFrame for testing
 data = {
     'UnderwrittenCoverID': [145249, 145249, 145249, 145255, 145255],
