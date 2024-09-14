@@ -30,9 +30,9 @@ jobs:
         pip install -r requirements.txt
         pip install dvc
 
-    - name: Run data processing script
-      run: |
-        python scripts/data_processing.py
+    # - name: Run data processing script
+    #   run: |
+    #     python scripts/data_processing.py
 
     # - name: Run Jupyter Notebooks
     #   run: |
