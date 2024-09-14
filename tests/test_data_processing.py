@@ -9,7 +9,7 @@ from data_processing import (
     load_data, summarize_data, check_missing_values
 )
 
-# Mock data for use in tests when running in CI environment
+# Mock data for testing in CI environment
 mock_data = """
 mmcode|Cylinders|CustomValueEstimate|NumberOfDoors|cubiccapacity|kilowatts|SumInsured|CalculatedPremiumPerTerm|TotalPremium|TotalClaims
 123|4|5000|4|1800|150|10000|1200|1300|1
@@ -17,7 +17,7 @@ mmcode|Cylinders|CustomValueEstimate|NumberOfDoors|cubiccapacity|kilowatts|SumIn
 """
 
 def load_mock_data():
-    # Load mock data from the string
+    """Loads the mock data from the string for testing in CI."""
     return pd.read_csv(io.StringIO(mock_data), delimiter='|')
 
 def file_exists(file_path):
@@ -26,9 +26,10 @@ def file_exists(file_path):
 def test_load_data():
     print("Testing load_data function...")
     
-    if os.getenv('CI'):  # Use mock data in CI environment
+    # Check if we're in a CI environment and use mock data
+    if os.getenv('CI') == 'true':  # CI is often set to 'true' in GitHub Actions
         df = load_mock_data()
-    else:  # Use real data locally
+    else:  # Use the real file locally
         file_path = '../data/MachineLearningRating_v3.txt'
         if not file_exists(file_path):
             print(f"Error: File {file_path} does not exist.")
@@ -42,9 +43,9 @@ def test_load_data():
 def test_summarize_data():
     print("Testing summarize_data function...")
     
-    if os.getenv('CI'):  # Use mock data in CI environment
+    if os.getenv('CI') == 'true':  # Use mock data in CI
         df = load_mock_data()
-    else:  # Use real data locally
+    else:  # Use the real file locally
         file_path = '../data/MachineLearningRating_v3.txt'
         if not file_exists(file_path):
             print(f"Error: File {file_path} does not exist.")
@@ -59,9 +60,9 @@ def test_summarize_data():
 def test_check_missing_values():
     print("Testing check_missing_values function...")
     
-    if os.getenv('CI'):  # Use mock data in CI environment
+    if os.getenv('CI') == 'true':  # Use mock data in CI
         df = load_mock_data()
-    else:  # Use real data locally
+    else:  # Use the real file locally
         file_path = '../data/MachineLearningRating_v3.txt'
         if not file_exists(file_path):
             print(f"Error: File {file_path} does not exist.")

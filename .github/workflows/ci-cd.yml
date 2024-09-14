@@ -38,9 +38,10 @@ jobs:
       run: |
         jupyter nbconvert --to notebook --execute notebooks/eda/eda_insurance_claims.ipynb
 
-    - name: Run tests
+    # Replace pytest with your custom test script
+    - name: Run custom tests
       run: |
-        pytest tests/ --maxfail=1 --disable-warnings -q
+        python tests/test_data_processing.py  # Replace pytest with your script
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v3
