@@ -1,8 +1,9 @@
 import pandas as pd
 
 def load_data(file_path):
-    """Load data from a CSV file."""
-    return pd.read_csv(file_path)
+    """Load data from a CSV file and skip bad lines."""
+    return pd.read_csv(file_path, on_bad_lines='skip')
+
 
 def summarize_data(df):
     """Summarize the data."""
