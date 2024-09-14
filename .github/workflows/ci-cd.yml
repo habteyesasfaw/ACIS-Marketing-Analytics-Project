@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - task-1
+      - task-2
+      - task-3
+      - task-4
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install dvc
+
+    # - name: Run data processing script
+    #   run: |
+    #     python scripts/data_processing.py
+
+    # - name: Run Jupyter Notebooks
+    #   run: |
+    #     jupyter nbconvert --to notebook --execute notebooks/eda/eda_insurance_claims.ipynb
+
+    # Replace pytest with your custom test script
+    - name: Run custom tests
+      run: |
+        python tests/test_data_processing.py  # Replace pytest with your script
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage/
