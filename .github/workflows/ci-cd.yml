@@ -32,7 +32,7 @@ jobs:
 
     - name: Run data processing script
       run: |
-        python src/data_processing.py
+        python scripts/data_processing.py
 
     - name: Run Jupyter Notebooks
       run: |
