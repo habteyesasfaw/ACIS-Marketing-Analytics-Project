@@ -20,9 +20,15 @@ def clean_data(df):
     return df
 
 # Updated segment_data function
-def segment_data(df, column, control_value, test_value):
-    group_a = df[df[column] == control_value]
-    group_b = df[df[column] == test_value]
+
+
+def segment_data(df, column_name, value_a, value_b):
+    group_a = df[df[column_name] == value_a]
+    group_b = df[df[column_name] == value_b]
+    
+    print(f"Group A ({value_a}): {len(group_a)} records")
+    print(f"Group B ({value_b}): {len(group_b)} records")
+    
     return group_a, group_b
 
 
@@ -77,13 +83,21 @@ def perform_chi_squared_test(group_a, group_b, kpi_col):
     return chi2_stat, p_value
 
 # Function to perform z-test
+# Function to perform z-test
 def perform_z_test(group_a, group_b, kpi_col):
     mean_a, mean_b = group_a[kpi_col].mean(), group_b[kpi_col].mean()
     std_a, std_b = group_a[kpi_col].std(), group_b[kpi_col].std()
     n_a, n_b = len(group_a), len(group_b)
+    
+    # Check if either group is empty
+    if n_a == 0 or n_b == 0:
+        raise ValueError("One of the groups is empty. Cannot perform z-test.")
+    
+    # Calculate z-statistic
     z_stat = (mean_a - mean_b) / np.sqrt((std_a**2/n_a) + (std_b**2/n_b))
     p_value = stats.norm.sf(abs(z_stat)) * 2  # Two-tailed test
     return z_stat, p_value
+
 
 # Calculate effect size for t-test (Cohen's d)
 def cohen_d(group_a, group_b, kpi_col):
@@ -123,10 +137,28 @@ def hypothesis_3(df, control_value, test_value, kpi_col='TotalPremium'):
     return interpret_p_value(p_value)
 
 # Hypothesis 4: Risk Differences Between Women and Men
-def hypothesis_4(df, control_value='F', test_value='M', kpi_col='TotalClaims'):
-    group_a, group_b = segment_data(df, 'Gender', control_value, test_value)
-    z_stat, p_value = perform_z_test(group_a, group_b, kpi_col)
-    return interpret_p_value(p_value)
+def hypothesis_4(df, control_value, test_value, kpi_col):
+    """
+    Hypothesis 4: Test for risk differences between gender groups.
+    :param df: DataFrame containing the data.
+    :param control_value: The value representing the control group (e.g., 'F').
+    :param test_value: The value representing the test group (e.g., 'M').
+    :param kpi_col: Column name for the KPI (e.g., 'TotalClaims').
+    :return: Result of the hypothesis test.
+    """
+    # Verify that the control_value and test_value exist in the Gender column
+    if control_value not in df['Gender'].values:
+        raise ValueError(f"No data for {control_value} in Gender column.")
+    if test_value not in df['Gender'].values:
+        raise ValueError(f"No data for {test_value} in Gender column.")
+    
+    # Segment data into control and test groups
+    group_a = df[df['Gender'] == control_value]
+    group_b = df[df['Gender'] == test_value]
+    
+   
+
+
 
 # Analyze and report findings, linking them to business strategy and customer experience
 def analyze_and_report(hypothesis_func, df, control_value, test_value, kpi_col, hypothesis_description):
