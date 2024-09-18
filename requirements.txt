@@ -1,4 +1,7 @@
-pandas        
+pandas     
+scikit-learn
+ xgboost
+  shap   
 numpy  
 matplotlib    
 seaborn    
